@@ -1,165 +1,91 @@
-import * as THREE from "three";
-import GLTFLoader from "three-gltf-loader";
-import { TweenMax } from "gsap";
-import OrbitControls from "three-orbitcontrols";
+import * as THREE from 'three'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { STLLoader } from 'three/examples/jsm/loaders/STLLoader'
+import Stats from 'three/examples/jsm/libs/stats.module'
 
-console.log("OrbitControls", OrbitControls);
+const scene = new THREE.Scene()
+scene.add(new THREE.AxesHelper(5))
 
-const backgroundColor = 0x000000;
+const light = new THREE.SpotLight()
+light.position.set(20, 20, 20)
+scene.add(light)
 
-/*////////////////////////////////////////*/
-
-var renderCalls = [];
-function render() {
-  requestAnimationFrame(render);
-  renderCalls.forEach(callback => {
-    callback();
-  });
-}
-render();
-
-/*////////////////////////////////////////*/
-
-var scene = new THREE.Scene();
-
-var camera = new THREE.PerspectiveCamera(
-  80,
+const camera = new THREE.PerspectiveCamera(
+  75,
   window.innerWidth / window.innerHeight,
   0.1,
-  800
-);
-camera.position.set(5, 5, 5);
+  1000
+)
+camera.position.z = 3
 
-var renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(backgroundColor); //0x );
+const renderer = new THREE.WebGLRenderer()
+renderer.outputEncoding = THREE.sRGBEncoding
+renderer.setSize(window.innerWidth, window.innerHeight)
+document.body.appendChild(renderer.domElement)
 
-renderer.toneMapping = THREE.LinearToneMapping;
-renderer.toneMappingExposure = Math.pow(0.94, 5.0);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFShadowMap;
+const controls = new OrbitControls(camera, renderer.domElement)
+controls.enableDamping = true
 
-window.addEventListener(
-  "resize",
-  function() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+const envTexture = new THREE.CubeTextureLoader().load([
+  'img/px_50.png',
+  'img/nx_50.png',
+  'img/py_50.png',
+  'img/ny_50.png',
+  'img/pz_50.png',
+  'img/nz_50.png'
+])
+envTexture.mapping = THREE.CubeReflectionMapping
+
+const material = new THREE.MeshPhysicalMaterial({
+  color: 0xffffc8,
+  envMap: envTexture,
+  metalness: 0.25,
+  roughness: 0.1,
+  opacity: 1.0,
+  transparent: true,
+  transmission: 0.99,
+  clearcoat: 1.0,
+  clearcoatRoughness: 0.25
+})
+
+const loader = new STLLoader()
+loader.load(
+  '../hezronkimutai-2021.stl',
+  function (geometry) {
+    const mesh = new THREE.Mesh(geometry, material)
+    scene.add(mesh)
   },
-  false
-);
+  (xhr) => {
+    console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
+  },
+  (error) => {
+    console.log(error)
+  }
+)
 
-document.body.appendChild(renderer.domElement);
-
-function renderScene() {
-  renderer.render(scene, camera);
+window.addEventListener('resize', onWindowResize, false)
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight
+  camera.updateProjectionMatrix()
+  renderer.setSize(window.innerWidth, window.innerHeight)
+  render()
 }
-renderCalls.push(renderScene);
 
-/* ////////////////////////////////////////////////////////////////////////// */
+const stats = Stats()
+document.body.appendChild(stats.dom)
 
-var controls = new OrbitControls(camera, renderer.domElement);
+function animate() {
+  requestAnimationFrame(animate)
 
-controls.rotateSpeed = 0.3;
-controls.zoomSpeed = 0.9;
+  controls.update()
 
-controls.minDistance = 3;
-controls.maxDistance = 20;
+  render()
 
-controls.minPolarAngle = 0; // radians
-controls.maxPolarAngle = Math.PI / 2; // radians
+  stats.update()
+}
 
-controls.enableDamping = true;
-controls.dampingFactor = 0.05;
+function render() {
+  renderer.render(scene, camera)
+}
 
-renderCalls.push(function() {
-  controls.update();
-});
-
-/* ////////////////////////////////////////////////////////////////////////// */
-
-var light = new THREE.PointLight(0xffffcc, 20, 200);
-light.position.set(4, 30, -20);
-scene.add(light);
-
-var light2 = new THREE.AmbientLight(0x20202a, 20, 100);
-light2.position.set(30, -10, 30);
-scene.add(light2);
-
-/* ////////////////////////////////////////////////////////////////////////// */
-
-var loader = new GLTFLoader();
-loader.crossOrigin = true;
-loader.load(
-  "../scene.gltf",
-  //"https://s3-us-west-2.amazonaws.com/s.cdpn.io/39255/ladybug.gltf",
-  function(data) {
-    var object = data.scene;
-    object.position.set(0, 0, -0.75);
-    //     object.rotation.set(Math.PI / -2, 0, 0);
-
-    //     TweenLite.from( object.rotation, 1.3, {
-    //       y: Math.PI * 2,
-    //       ease: 'Power3.easeOut'
-    //     });
-
-    /*TweenMax.from( object.position, 3, {
-      y: -8,
-      yoyo: true,
-      repeat: -1,
-      ease: 'Power2.easeInOut'
-    });*/
-    //object.position.y = - 95;
-    scene.add(object);
-    //, onProgress, onError );
-  }
-);
-
-/*// Instantiate a loader
-import * as THREE from "three";
-import GLTFLoader from "three-gltf-loader";
-
-console.log("three", THREE, GLTFLoader);
-var loader = new GLTFLoader();
-
-// Optional: Provide a DRACOLoader instance to decode compressed mesh data
-var dracoLoader = new THREE.DRACOLoader();
-
-dracoLoader.setDecoderPath("/examples/js/libs/draco");
-loader.setDRACOLoader(dracoLoader);
-
-// Load a glTF resource
-loader.load(
-  // resource URL
-  "models/gltf/duck/duck.gltf",
-  // called when the resource is loaded
-  function(gltf) {
-    scene.add(gltf.scene);
-
-    gltf.animations; // Array<THREE.AnimationClip>
-    gltf.scene; // THREE.Scene
-    gltf.scenes; // Array<THREE.Scene>
-    gltf.cameras; // Array<THREE.Camera>
-    gltf.asset; // Object
-  },
-  // called while loading is progressing
-  function(xhr) {
-    console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
-  },
-  // called when loading has errors
-  function(error) {
-    console.log("An error happened");
-  }
-);
-*/
-/*import "./styles.css";
-
-document.getElementById("app").innerHTML = `
-<h1>Hello Vanilla!</h1>
-<div>
-  We use Parcel to bundle this sandbox, you can find more info about Parcel
-  <a href="https://parceljs.org" target="_blank" rel="noopener noreferrer">here</a>.
-</div>
-`;
-*/
+animate()
