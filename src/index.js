@@ -92,11 +92,11 @@ scene.add(light2);
 var loader = new GLTFLoader();
 loader.crossOrigin = true;
 loader.load(
-  "../cubes_scene_all.gltf",
+  "../scene.gltf",
   //"https://s3-us-west-2.amazonaws.com/s.cdpn.io/39255/ladybug.gltf",
   function(data) {
     var object = data.scene;
-    object.position.set(0, -10, -0.75);
+    object.position.set(0, 0, -0.75);
     //     object.rotation.set(Math.PI / -2, 0, 0);
 
     //     TweenLite.from( object.rotation, 1.3, {
