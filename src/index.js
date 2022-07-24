@@ -4,8 +4,13 @@ import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
 
 import Stats from 'three/examples/jsm/libs/stats.module'
 
+var speed = 0.01;
+let index = 0;
+
 const scene = new THREE.Scene()
-scene.add(new THREE.AxesHelper(5))
+scene.add(new THREE.AxesHelper(1))
+
+var axis = new THREE.Vector3(4, 0, 7).normalize();
 
 
 const light1 = new THREE.SpotLight()
@@ -17,71 +22,41 @@ light2.position.set(20, 20, 20)
 scene.add(light2)
 
 const light3 = new THREE.SpotLight()
-light3.position.set(-20, -20, -20)
+light3.position.set(-20, 20, 20)
 scene.add(light3)
 
 const light4 = new THREE.SpotLight()
-light4.position.set(-40, 40, 40)
+light4.position.set(20, -20, 20)
 scene.add(light4)
 
 const light5 = new THREE.SpotLight()
-light5.position.set(20, -20, 20)
+light5.position.set(20, 20, -20)
 scene.add(light5)
 
-let object1;
+
+const stats = Stats()
+document.body.appendChild(stats.dom)
 
 
 const camera = new THREE.PerspectiveCamera(
   30,
   window.innerWidth / window.innerHeight,
   0.1,
-  1000
+  100
 )
 camera.position.z = 20;
 camera.position.y = -20;
 camera.position.x = 20;
+
+
 const renderer = new THREE.WebGLRenderer()
 renderer.outputEncoding = THREE.sRGBEncoding
-renderer.setSize(window.innerWidth, window.innerHeight)
+renderer.setSize(window.innerWidth - 50, window.innerHeight - 50)
 document.body.appendChild(renderer.domElement)
 
 const controls = new OrbitControls(camera, renderer.domElement)
 controls.enableDamping = true
-// controls.autoRotate = true
-// controls.autoRotateSpeed = 10;
-
-
-
-const envTexture = new THREE.CubeTextureLoader().load([
-  '../160920-irish-2.jpg',
-  '../160920-irish-2.jpg',
-  '../160920-irish-2.jpg',
-  '../160920-irish-2.jpg',
-  '../160920-irish-2.jpg',
-  '../160920-irish-2.jpg',
-])
-envTexture.mapping = THREE.CubeReflectionMapping
-
-// const material = new THREE.MeshPhysicalMaterial({
-//   color: 0xffffff,
-//   envMap: envTexture,
-//   metalness: 0.25,
-//   roughness: 0.1,
-//   opacity: 1.0,
-//   transparent: true,
-//   transmission: 0.99,
-//   clearcoat: 1.0,
-//   clearcoatRoughness: 0.25
-// })
-
-// var geometry = new THREE.BoxGeometry(1, 1, 1);
-
-// var cube = new THREE.Mesh(geometry, material);
-// scene.add(cube);
-
-
-
-
+controls.update();
 
 window.addEventListener('resize', onWindowResize, false)
 function onWindowResize() {
@@ -90,18 +65,12 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight)
   render()
 }
-controls.update();
 
-const stats = Stats()
-document.body.appendChild(stats.dom)
 
-var axis = new THREE.Vector3(4, 0, 7).normalize();
-var speed = 0.01;
-let index = 0;
+
 
 function animate() {
   requestAnimationFrame(animate)
-
   const fbxLoader = new FBXLoader()
   fbxLoader.load(
     '../scene.fbx',
