@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
+import { STLLoader } from 'three/examples/jsm/loaders/STLLoader'
 
 import Stats from 'three/examples/jsm/libs/stats.module'
 
@@ -8,7 +9,7 @@ var speed = 0.01;
 let index = 0;
 
 const scene = new THREE.Scene()
-scene.add(new THREE.AxesHelper(1))
+scene.add(new THREE.AxesHelper(0))
 
 var axis = new THREE.Vector3(4, 0, 7).normalize();
 
@@ -44,9 +45,9 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   100
 )
-camera.position.z = 20;
-camera.position.y = -20;
-camera.position.x = 20;
+camera.position.z = 10;
+camera.position.y = -10;
+camera.position.x = 10;
 
 
 const renderer = new THREE.WebGLRenderer()
@@ -66,44 +67,83 @@ function onWindowResize() {
   render()
 }
 
+const envTexture = new THREE.CubeTextureLoader().load([
+  '',
+  '',
+  '',
+  '',
+  '',
+  ''
+])
+envTexture.mapping = THREE.CubeReflectionMapping
 
 
+const material = new THREE.MeshPhysicalMaterial({
+  color: 0xb2ffc8,
+  envMap: envTexture,
+  metalness: 0.25,
+  roughness: 0.1,
+  opacity: 1.0,
+  transparent: true,
+  transmission: 0.99,
+  clearcoat: 1.0,
+  clearcoatRoughness: 0.25
+});
+
+const loader = new STLLoader()
+loader.load(
+  '../3d.stl',
+  function (geometry) {
+    const mesh = new THREE.Mesh(geometry, material)
+    scene.add(mesh)
+  },
+  (xhr) => {
+    console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
+  },
+  (error) => {
+    console.log(error)
+  }
+)
+const fbxLoader = new FBXLoader()
+
+// scene.background = new THREE.Color(0xffffff);
 
 function animate() {
   requestAnimationFrame(animate)
-  const fbxLoader = new FBXLoader()
-  fbxLoader.load(
-    '../scene.fbx',
-    (object) => {
-      object.name = `object_${index}`;
-      scene.add(object)
-      try {
-        if (index) {
-          var selectedObject = scene.getObjectByName(`object_${index - 1}`);
-          console.log({ selectedObject, index, object, scene });
-          scene.remove(selectedObject);
-        }
-        index++;
+  // fbxLoader.load(
+  //   '../scene.fbx',
+  //   (object) => {
+  //     object.name = `object_${index}`;
+  //     scene.add(object)
+  //     try {
+  //       if (index) {
+  //         var selectedObject = scene.getObjectByName(`object_${index - 1}`);
+  //         console.log({ selectedObject, index, object, scene });
+  //         scene.remove(selectedObject);
+  //       }
+  //       index++;
 
-      } catch (error) {
+  //     } catch (error) {
 
-      }
-      object.rotateOnAxis(axis, speed += 0.01);
-    },
-    (xhr) => {
-      console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
-    },
-    (error) => {
-      console.log(error)
-    }
-  )
+  //     }
+  //     object.rotateOnAxis(axis, speed += 0.01);
+  //   },
+  //   (xhr) => {
+  //     console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
+  //   },
+  //   (error) => {
+  //     console.log(error)
+  //   }
+  // )
   render()
 
   stats.update()
 }
 
 function render() {
-  renderer.render(scene, camera)
+  renderer.render(scene, camera);
+  renderer.setClearColor(0xffffff, 0);
+
 }
 
 animate()
