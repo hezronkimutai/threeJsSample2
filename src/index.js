@@ -11,27 +11,27 @@ let index = 0;
 const scene = new THREE.Scene()
 scene.add(new THREE.AxesHelper(0))
 
-var axis = new THREE.Vector3(4, 0, 7).normalize();
+var axis = new THREE.Vector3(-1, -10, -60).normalize();
 
 
 const light1 = new THREE.SpotLight()
-light1.position.set(-20, -20, -20)
+light1.position.set(-200, -200, -200)
 scene.add(light1)
 
 const light2 = new THREE.SpotLight()
-light2.position.set(20, 20, 20)
+light2.position.set(200, 200, 200)
 scene.add(light2)
 
 const light3 = new THREE.SpotLight()
-light3.position.set(-20, 20, 20)
+light3.position.set(-200, 200, 200)
 scene.add(light3)
 
 const light4 = new THREE.SpotLight()
-light4.position.set(20, -20, 20)
+light4.position.set(200, -200, 200)
 scene.add(light4)
 
 const light5 = new THREE.SpotLight()
-light5.position.set(20, 20, -20)
+light5.position.set(200, 200, -200)
 scene.add(light5)
 
 
@@ -43,11 +43,11 @@ const camera = new THREE.PerspectiveCamera(
   30,
   window.innerWidth / window.innerHeight,
   0.1,
-  100
+  1500
 )
-camera.position.z = 10;
-camera.position.y = -10;
-camera.position.x = 10;
+camera.position.z = 90;
+camera.position.y = -90;
+camera.position.x = 90;
 
 
 const renderer = new THREE.WebGLRenderer()
@@ -110,31 +110,31 @@ const fbxLoader = new FBXLoader()
 
 function animate() {
   requestAnimationFrame(animate)
-  // fbxLoader.load(
-  //   '../scene.fbx',
-  //   (object) => {
-  //     object.name = `object_${index}`;
-  //     scene.add(object)
-  //     try {
-  //       if (index) {
-  //         var selectedObject = scene.getObjectByName(`object_${index - 1}`);
-  //         console.log({ selectedObject, index, object, scene });
-  //         scene.remove(selectedObject);
-  //       }
-  //       index++;
+  fbxLoader.load(
+    '../fbx3d.fbx',
+    (object) => {
+      object.name = `object_${index}`;
+      scene.add(object)
+      try {
+        if (index) {
+          var selectedObject = scene.getObjectByName(`object_${index - 1}`);
+          console.log({ selectedObject, index, object, scene });
+          scene.remove(selectedObject);
+        }
+        index++;
 
-  //     } catch (error) {
+      } catch (error) {
 
-  //     }
-  //     object.rotateOnAxis(axis, speed += 0.01);
-  //   },
-  //   (xhr) => {
-  //     console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
-  //   },
-  //   (error) => {
-  //     console.log(error)
-  //   }
-  // )
+      }
+      object.rotateOnAxis(axis, speed += 0.02);
+    },
+    (xhr) => {
+      console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
+    },
+    (error) => {
+      console.log(error)
+    }
+  )
   render()
 
   stats.update()
