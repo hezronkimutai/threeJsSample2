@@ -7,11 +7,14 @@ import Stats from 'three/examples/jsm/libs/stats.module'
 
 var speed = 0.01;
 let index = 0;
+var transitionx = 0;
+var transitiony = 0;
+var transitionz = 0;
 
 const scene = new THREE.Scene()
 scene.add(new THREE.AxesHelper(0))
 
-var axis = new THREE.Vector3(-1, -10, -60).normalize();
+var axis = new THREE.Vector3(1, 10, 60).normalize();
 
 
 const light1 = new THREE.SpotLight()
@@ -45,9 +48,9 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1500
 )
-camera.position.z = 90;
-camera.position.y = -90;
-camera.position.x = 90;
+camera.position.z = 150;
+camera.position.y = -150;
+camera.position.x = 150;
 
 
 const renderer = new THREE.WebGLRenderer()
@@ -106,7 +109,10 @@ loader.load(
 )
 const fbxLoader = new FBXLoader()
 
-// scene.background = new THREE.Color(0xffffff);
+
+let transitionxUp = true;
+let transitionyUp = true;
+let transitionzUp = true;
 
 function animate() {
   requestAnimationFrame(animate)
@@ -114,7 +120,10 @@ function animate() {
     '../fbx3d.fbx',
     (object) => {
       object.name = `object_${index}`;
-      scene.add(object)
+      scene.add(object);
+      object.rotateX(2);
+      object.rotateY(2);
+
       try {
         if (index) {
           var selectedObject = scene.getObjectByName(`object_${index - 1}`);
@@ -126,7 +135,41 @@ function animate() {
       } catch (error) {
 
       }
-      object.rotateOnAxis(axis, speed += 0.02);
+
+      object.translateZ((transitionz += (transitionzUp ? 0.05 : -0.06)));
+      object.translateX((transitionx += (transitionxUp ? 0.1 : -0.1)));
+      object.translateY((transitiony += (transitionyUp ? -0.05 : 0.06)));
+
+      if (transitionz >= 70) {
+        transitionzUp = false;
+      }
+      if (transitionz <= -70) {
+        transitionzUp = true;
+
+      }
+
+
+      if (transitionx >= 70) {
+        transitionxUp = false;
+      }
+      if (transitionx <= -70) {
+        transitionxUp = true;
+
+      }
+
+
+
+
+      if (transitiony >= 70) {
+        transitionyUp = false;
+      }
+      if (transitiony <= -70) {
+        transitionyUp = true;
+
+      }
+
+
+
     },
     (xhr) => {
       console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
