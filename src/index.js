@@ -113,6 +113,15 @@ const fbxLoader = new FBXLoader()
 let transitionxUp = true;
 let transitionyUp = true;
 let transitionzUp = true;
+const removed = [];
+const getRandomNo = (index) => {
+
+  var randomNum = Math.floor(Math.random() * index) + 1;
+  if (!removed.includes(randomNum)) {
+    return randomNum;
+  }
+  getRandomNo(index);
+}
 
 function animate() {
   requestAnimationFrame(animate)
@@ -123,11 +132,14 @@ function animate() {
       scene.add(object);
       object.rotateX(2);
       object.rotateY(2);
-
+      console.log({ transitionx, transitiony, transitionz });
       try {
-        if (index) {
+        if (!((transitionx < -30.0 && transitionx > -30.1) || (transitionx < 30.1 && transitionx > 30)
+          || (transitionx < -10 && transitionx > -10.1) || (transitionx < 10.1 && transitionx > 10)
+          || (transitionx < -60 && transitionx > -60.1) || (transitionx < 60.1 && transitionx > 60)
+
+        )) {
           var selectedObject = scene.getObjectByName(`object_${index - 1}`);
-          console.log({ selectedObject, index, object, scene });
           scene.remove(selectedObject);
         }
         index++;
@@ -136,9 +148,9 @@ function animate() {
 
       }
 
-      object.translateZ((transitionz += (transitionzUp ? 0.05 : -0.06)));
+      object.translateZ((transitionz += (transitionzUp ? 0.5 : -0.6)));
       object.translateX((transitionx += (transitionxUp ? 0.1 : -0.1)));
-      object.translateY((transitiony += (transitionyUp ? -0.05 : 0.06)));
+      object.translateY((transitiony += (transitionyUp ? 0.5 : -0.6)));
 
       if (transitionz >= 70) {
         transitionzUp = false;
