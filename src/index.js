@@ -141,6 +141,8 @@ function animate() {
         )) {
           var selectedObject = scene.getObjectByName(`object_${index - 1}`);
           scene.remove(selectedObject);
+          var randomObject = scene.getObjectByName(`object_${getRandomNo(index)}`);
+          scene.remove(randomObject);
         }
         index++;
 
